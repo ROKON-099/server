@@ -6,32 +6,32 @@ const { MongoClient, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5001;
 
+/* =======================
+   CORS CONFIG (FINAL)
+======================= */
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://client-pvf9.vercel.app"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://client-pvf9.vercel.app/"
-    ],
-    credentials: true,
-  })
-);
-
+app.options("*", cors());
 app.use(express.json());
 
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// MongoDB Connection
+/* =======================
+   MongoDB Connection
+======================= */
 const uri = "mongodb+srv://db-user-1:qRSgMsoUQ6L0k3CG@cluster0.ljx7nxk.mongodb.net/?appName=Cluster0";
 const client = new MongoClient(uri);
 
 async function run() {
   try {
     const db = client.db('mydb');
-    const vehiclesCollection = db.collection('users');   // vehicles
+    const vehiclesCollection = db.collection('users'); // vehicles
     const bookingsCollection = db.collection('bookings');
 
     // ROOT
@@ -39,7 +39,9 @@ async function run() {
       res.send('TravelEase Server is Running 🚗');
     });
 
-    // ==================== VEHICLES ====================
+    /* =======================
+       VEHICLES
+    ======================= */
 
     app.get('/vehicles', async (req, res) => {
       try {
@@ -52,12 +54,8 @@ async function run() {
             { description: { $regex: search, $options: 'i' } }
           ];
         }
-        if (category && category !== 'all') {
-          query.category = category;
-        }
-        if (location) {
-          query.location = { $regex: location, $options: 'i' };
-        }
+        if (category && category !== 'all') query.category = category;
+        if (location) query.location = { $regex: location, $options: 'i' };
 
         let sortOption = { createdAt: -1 };
         if (sort === 'price_asc') sortOption = { pricePerDay: 1 };
@@ -128,9 +126,10 @@ async function run() {
       res.send({ message: 'Vehicle and related bookings deleted' });
     });
 
-    // ==================== BOOKINGS ====================
+    /* =======================
+       BOOKINGS
+    ======================= */
 
-    // ✅ Create Booking (Duplicate Prevented, No availability update)
     app.post('/bookings', async (req, res) => {
       try {
         const { vehicleId, userEmail } = req.body;
@@ -158,7 +157,6 @@ async function run() {
       }
     });
 
-    // ✅ Get My Bookings
     app.get('/bookings/:email', async (req, res) => {
       const bookings = await bookingsCollection
         .find({ userEmail: req.params.email })
@@ -177,7 +175,6 @@ async function run() {
       res.send(bookingsWithVehicle);
     });
 
-    // ✅ Remove Booking (Make available again)
     app.delete('/bookings/:id', async (req, res) => {
       const result = await bookingsCollection.deleteOne({
         _id: new ObjectId(req.params.id),
@@ -191,7 +188,6 @@ async function run() {
     });
 
     console.log("TravelEase Server Ready 🚀");
-
   } catch (err) {
     console.error(err);
   }
@@ -200,5 +196,5 @@ async function run() {
 run();
 
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });
