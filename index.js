@@ -5,6 +5,18 @@ const { MongoClient, ObjectId } = require('mongodb');
 
 const app = express();
 const port = process.env.PORT || 5001;
+import cors from "cors";
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://client-3t7k.vercel.app"
+    ],
+    credentials: true,
+  })
+);
+
 
 // Middleware
 app.use(cors());
