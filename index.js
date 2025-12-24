@@ -31,17 +31,15 @@ const client = new MongoClient(uri);
 async function run() {
   try {
     const db = client.db('mydb');
-    const vehiclesCollection = db.collection('users'); // vehicles
+    const vehiclesCollection = db.collection('users'); 
     const bookingsCollection = db.collection('bookings');
 
     // ROOT
     app.get('/', (req, res) => {
-      res.send('TravelEase Server is Running 🚗');
+      res.send('TravelEase Server is Running ');
     });
 
-    /* =======================
-       VEHICLES
-    ======================= */
+    
 
     app.get('/vehicles', async (req, res) => {
       try {
